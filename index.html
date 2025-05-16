@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Single Page App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h2 {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .hidden {
+            display: none;
+        }
+        .dashboard {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sign-In Form -->
+        <div id="sign-in" class="">
+            <h2>Sign In</h2>
+            <div class="form-group">
+                <label for="signin-email">Email:</label>
+                <input type="email" id="signin-email" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="signin-password">Password:</label>
+                <input type="password" id="signin-password" placeholder="Enter your password">
+            </div>
+            <button class="btn" onclick="handleSignIn()">Sign In</button>
+            <p><a href="#" onclick="showSignUp()">Don't have an account? Sign Up</a></p>
+        </div>
+
+        <!-- Sign-Up Form -->
+        <div id="sign-up" class="hidden">
+            <h2>Sign Up</h2>
+            <div class="form-group">
+                <label for="signup-email">Email:</label>
+                <input type="email" id="signup-email" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="signup-password">Password:</label>
+                <input type="password" id="signup-password" placeholder="Enter your password">
+            </div>
+            <button class="btn" onclick="handleSignUp()">Sign Up</button>
+            <p><a href="#" onclick="showSignIn()">Already have an account? Sign In</a></p>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="admin-dashboard" class="hidden">
+            <h2>Admin Dashboard</h2>
+            <p>Welcome, Admin!</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Password</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="user-table">
+                    <!-- User rows will be dynamically added here -->
+                </tbody>
+            </table>
+            <button class="btn" onclick="handleLogout()">Logout</button>
+        </div>
+
+        <!-- User Dashboard -->
+        <div id="user-dashboard" class="hidden">
+            <h2>User Dashboard</h2>
+            <p>Welcome, User!</p>
+            <button class="btn" onclick="handleLogout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        const users = [
+            { email: 'user1@example.com', password: 'user123' },
+            { email: 'user2@example.com', password: 'user456' }
+        ];
+
+        function showSignIn() {
+            document.getElementById('sign-in').classList.remove('hidden');
+            document.getElementById('sign-up').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.add('hidden');
+            document.getElementById('user-dashboard').classList.add('hidden');
+        }
+
+        function showSignUp() {
+            document.getElementById('sign-in').classList.add('hidden');
+            document.getElementById('sign-up').classList.remove('hidden');
+        }
+
+        function handleSignIn() {
+            const email = document.getElementById('signin-email').value;
+            const password = document.getElementById('signin-password').value;
+
+            if (email === 'admin@example.com' && password === 'admin123') {
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                document.getElementById('sign-in').classList.add('hidden');
+                populateUserTable();
+            } else {
+                const user = users.find(u => u.email === email && u.password === password);
+                if (user) {
+                    document.getElementById('user-dashboard').classList.remove('hidden');
+                    document.getElementById('sign-in').classList.add('hidden');
+                } else {
+                    alert('Invalid credentials');
+                }
+            }
+        }
+
+        function handleSignUp() {
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+
+            users.push({ email, password });
+            alert('Sign-up successful! Please sign in.');
+            showSignIn();
+        }
+
+        function handleLogout() {
+            showSignIn();
+        }
+
+        function populateUserTable() {
+            const tableBody = document.getElementById('user-table');
+            tableBody.innerHTML = '';
+
+            users.forEach((user, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="text" value="${user.email}" data-index="${index}" data-field="email" onchange="editUser(this)"></td>
+                    <td><input type="text" value="${user.password}" data-index="${index}" data-field="password" onchange="editUser(this)"></td>
+                    <td><button onclick="deleteUser(${index})">Delete</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function editUser(input) {
+            const index = input.getAttribute('data-index');
+            const field = input.getAttribute('data-field');
+            users[index][field] = input.value;
+        }
+
+        function deleteUser(index) {
+            users.splice(index, 1);
+            populateUserTable();
+        }
+    </script>
+</body>
+</html>
